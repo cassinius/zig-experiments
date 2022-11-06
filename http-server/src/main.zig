@@ -10,31 +10,37 @@ pub const io_mode = .evented;
 /// 1. Library => create a webserver with config
 /// 2. Executable => gets a config file in YAML
 pub fn main() anyerror!void {
-    try printStuff();
+    // try printStuff();
 
     var stream_server = StreamServer.init(.{});
 
     defer stream_server.close();
 
-    const address = try Address.resolveIp("127.0.0.1", 5445);
+    const host: []const u8 = "127.0.0.1";
+    const port: u16 = 5445;
+    const address = try Address.resolveIp(host, port);
 
     try stream_server.listen(address);
 
+    std.log.info("Webserver started on host {s}, port {d}", .{host, port});
+
     while (true) {
         const connection = try stream_server.accept();
-
-        try connection.stream.writer().print("Irvicius from Zig TCP WebServer...\n", .{});
-
-        connection.stream.close();
+        try handler(connection.stream);
     }
 }
 
-fn printStuff() anyerror!void {
-    std.log.info("Blahoo!", .{});
-    std.log.warn("Omg, iceberg ahead!", .{});
-    std.log.err("We're sinking {s} help in sight!!", .{"NO"});
-    std.log.debug("Lamest debug info ever...", .{});
+fn handler(stream: net.Stream) !void {
+    defer stream.close();
+    try stream.writer().print("Irvicius from Zig TCP WebServer (handler)...\n", .{});
 }
+
+// fn printStuff() anyerror!void {
+//     std.log.info("Blahoo!", .{});
+//     std.log.warn("Omg, iceberg ahead!", .{});
+//     std.log.err("We're sinking {s} help in sight!!", .{"NO"});
+//     std.log.debug("Lamest debug info ever...", .{});
+// }
 
 // pub fn main() !void {
 //     // Prints to stderr (it's a shortcut based on `std.io.getStdErr()`)
