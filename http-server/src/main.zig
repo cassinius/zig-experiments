@@ -2,6 +2,8 @@ const std = @import("std");
 const net = std.net;
 const StreamServer = net.StreamServer;
 const Address = net.Address;
+// This makes the whole thing async...!?
+pub const io_mode = .evented;
 
 /// Async Webserver : TCP Listener + HTTP protocol + handlers
 /// Two ways of using it:
@@ -10,9 +12,22 @@ const Address = net.Address;
 pub fn main() anyerror!void {
     try printStuff();
 
-    StreamServer.init(.{});
-}
+    var stream_server = StreamServer.init(.{});
 
+    defer stream_server.close();
+
+    const address = try Address.resolveIp("127.0.0.1", 5445);
+
+    try stream_server.listen(address);
+
+    while (true) {
+        const connection = try stream_server.accept();
+
+        try connection.stream.writer().print("Irvicius from Zig TCP WebServer...\n", .{});
+
+        connection.stream.close();
+    }
+}
 
 fn printStuff() anyerror!void {
     std.log.info("Blahoo!", .{});
