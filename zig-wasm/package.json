@@ -7,7 +7,9 @@
   "license": "MIT",
   "repository": "https://github.com/cassinius/zig-experiments",
   "scripts": {
-    "clean": "rm -f *.wasm*",
-    "build": "yarn clean && zig build-lib math.zig -target wasm32-freestanding -dynamic"
+    "clean": "rm -f *.wasm* && rm -f *.wat",
+    "build:wasm": "yarn clean && zig build-lib math.zig -target wasm32-freestanding -dynamic",
+    "build:wasi": "yarn clean && zig build-exe math.zig -target wasm32-wasi",
+    "wasm2wat": "wasm2wat math.wasm -o math.wat"
   }
 }
